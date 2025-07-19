@@ -1,6 +1,18 @@
 import pandas as pd
 from typing import List, Tuple, Dict, Set
 
+# Labels used when returning the semester-by-semester plan
+SEMESTER_LABELS = [
+    "Fall 2023",
+    "Spring 2024",
+    "Fall 2024",
+    "Spring 2025",
+    "Fall 2025",
+    "Spring 2026",
+    "Fall 2026",
+    "Spring 2027",
+]
+
 # Sets of interchangeable courses that satisfy the same requirement
 INTERCHANGEABLE_SETS: List[Set[str]] = [
     {"MATH211", "MATH273"},  # Calculus requirement
@@ -124,7 +136,8 @@ def generate_plan(track: str, completed_courses: List[str], max_credits: int = 1
                     break
 
         if sem_courses:
-            plan.append({'semester': f'Semester {sem}', 'courses': sem_courses, 'credits': credits})
+            label = SEMESTER_LABELS[sem - 1] if sem - 1 < len(SEMESTER_LABELS) else f"Semester {sem}"
+            plan.append({'semester': label, 'courses': sem_courses, 'credits': credits})
         if remaining.empty:
             break
     unscheduled = remaining[['course_id', 'course_name', 'category']].to_dict('records')
