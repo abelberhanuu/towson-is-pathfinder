@@ -1,48 +1,75 @@
 import pandas as pd
 from typing import List, Tuple, Dict, Set
 
-# Labels for semester display
+# Semester labels for each term
 SEMESTER_LABELS = [
     "Fall 2023", "Spring 2024", "Fall 2024", "Spring 2025",
     "Fall 2025", "Spring 2026", "Fall 2026", "Spring 2027",
 ]
 
-# Interchangeable course sets (only one needed)
+# Sets of interchangeable courses that satisfy the same requirement
 INTERCHANGEABLE_SETS: List[Set[str]] = [
-    {"MATH211", "MATH273"},  # Calculus
-    {"MATH231", "MATH330"},  # Statistics
-    {"ART102", "ART103"},    # 2D Art
-    {"CIS212", "COSC236"},   # Intro to programming
+    {"MATH211", "MATH273"},  # Calculus requirement
+    {"MATH231", "MATH330"},  # Statistics requirement
+    {"ART102", "ART103"},    # 2D Process for Interface Design
+    {"CIS212", "COSC236"},   # Programming Intro (Systems)
 ]
+
+# Explicit prerequisite mapping by course ID
+PREREQ_MAP: Dict[str, List[str]] = {
+    "COSC236": ["COSC175"],
+    "COSC237": ["COSC236"],
+    "CIS239": ["CIS211"],
+    "CIS379": ["CIS211"],
+    "CIS458": ["CIS379"],
+    "CIS479": ["CIS379"],
+    "CIS475": ["CIS479", "CIS458"],
+    "COSC418": ["ENGL102"],
+    "ENGL317": ["ENGL102"],
+    "CIS334": ["CIS379"],
+    "CIS328": ["CIS211"],
+    "CIS428": ["CIS328", "CIS334"],
+    "CIS468": ["MATH231", "CIS334"],
+    "CIS436": ["CIS379"],
+    "ART217": ["ART103"],
+    "COSC336": ["COSC237"],
+    "COSC412": ["COSC336"],
+    "COSC436": ["COSC336"],
+    "COSC484": ["COSC336"],
+    "ACCT202": ["ACCT201"],
+    "ACCT301": ["ACCT202"],
+    "ACCT341": ["ACCT202"],
+    "EBTM419": ["EBTM365"],
+    "EBTM454": ["EBTM365"],
+    "HCMN305": ["HLTH207"],
+    "MNGT395": ["MNGT361"],
+    "ITEC427": ["ITEC231"],
+    "ITEC345": ["COSC236", "MATH263"],
+    "ITEC423": ["ITEC231"],
+}
+
 
 def generate_plan(track: str, completed_courses: List[str], max_credits: int = 18) -> Tuple[List[Dict], List[Dict]]:
     df = pd.read_csv('data/towson_courses.csv')
-
-    # Track filtering
     df = df[(df['track'] == 'All') | (df['track'] == track)].copy()
 
     done_set: Set[str] = set(completed_courses)
 
-    # Fulfill interchangeable requirements
     for course_set in INTERCHANGEABLE_SETS:
         if done_set.intersection(course_set):
             done_set.update(course_set)
 
-    # Remove completed/interchangeable courses
     df = df[~df['course_id'].isin(done_set)].copy()
 
-    # Determine if prerequisites are met
-    def met_prereqs(prereq_str: str, done: set) -> bool:
-        if pd.isna(prereq_str) or prereq_str.strip() == '':
-            return True
-        prereq_list = []
-        for part in prereq_str.replace(';', ',').split(','):
-            part = part.strip()
-            if part:
-                prereq_list.append(part)
-        return all(pr in done for pr in prereq_list)
+    def met_prereqs(course_id: str, prereq_str: str, done: set) -> bool:
+        prereqs = PREREQ_MAP.get(course_id)
+        if prereqs is None:
+            if pd.isna(prereq_str) or prereq_str.strip() == '':
+                prereqs = []
+            else:
+                prereqs = [p.strip() for p in prereq_str.replace(';', ',').split(',') if p.strip()]
+        return all(pr in done for pr in prereqs)
 
-    # Label courses
     def label(row: pd.Series) -> str:
         if row['core_required'] == 'yes' and row['track'] == 'All':
             return 'Core'
@@ -67,7 +94,7 @@ def generate_plan(track: str, completed_courses: List[str], max_credits: int = 1
         credits = 0
 
         while credits < max_credits:
-            available = remaining[remaining['prerequisites'].apply(lambda x: met_prereqs(x, done_set))]
+            available = remaining[remaining.apply(lambda r: met_prereqs(r['course_id'], r['prerequisites'], done_set), axis=1)]
             if available.empty:
                 break
 
@@ -104,10 +131,8 @@ def generate_plan(track: str, completed_courses: List[str], max_credits: int = 1
                 break
 
             if credits >= 15:
-                fits = any(
-                    credits + int(u) <= max_credits
-                    for u in remaining[remaining['prerequisites'].apply(lambda x: met_prereqs(x, done_set))]['units'].astype(int)
-                )
+                more = remaining[remaining.apply(lambda r: met_prereqs(r['course_id'], r['prerequisites'], done_set), axis=1)]
+                fits = any(credits + int(u) <= max_credits for u in more['units'].astype(int).tolist())
                 if not fits:
                     break
 
@@ -121,12 +146,15 @@ def generate_plan(track: str, completed_courses: List[str], max_credits: int = 1
     unscheduled = remaining[['course_id', 'course_name', 'category']].to_dict('records')
     return plan, unscheduled
 
+
 if __name__ == "__main__":
     import argparse, json
+
     parser = argparse.ArgumentParser(description="Generate 4-year plan")
     parser.add_argument("--track", required=True, help="Selected track")
     parser.add_argument("--completed", nargs="*", default=[], help="Completed course IDs")
-    parser.add_argument("--max-credits", type=int, default=18, help="Maximum credits per semester")
+    parser.add_argument("--max-credits", type=int, default=18, dest="max_credits", help="Maximum credits per semester")
     args = parser.parse_args()
+
     plan, unscheduled = generate_plan(args.track, args.completed, args.max_credits)
     print(json.dumps({"plan": plan, "unscheduled": unscheduled}, indent=2))
