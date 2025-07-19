@@ -22,7 +22,7 @@ def recommend():
 def plan():
     track = request.form.get('track')
     completed_courses = request.form.getlist('completed_courses')
-    max_credits = request.form.get('max_credits', type=int, default=16)
+    max_credits = request.form.get('max_credits', type=int, default=18)
     plan, unscheduled = generate_plan(track, completed_courses, max_credits)
     return render_template('plan.html', plan=plan, unscheduled=unscheduled)
 
