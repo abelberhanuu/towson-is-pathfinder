@@ -1,7 +1,15 @@
 import pandas as pd
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Set
 
-def generate_plan(track: str, completed_courses: List[str], max_credits: int = 16) -> Tuple[List[Dict], List[Dict]]:
+# Sets of interchangeable courses that satisfy the same requirement
+INTERCHANGEABLE_SETS: List[Set[str]] = [
+    {"MATH211", "MATH273"},  # Calculus requirement
+    {"MATH231", "MATH330"},  # Statistics requirement
+    {"ART102", "ART103"},    # 2D Process for Interface Design
+    {"CIS212", "COSC236"},   # Programming Intro (Systems)
+]
+
+def generate_plan(track: str, completed_courses: List[str], max_credits: int = 18) -> Tuple[List[Dict], List[Dict]]:
     """Generate a semester-by-semester plan.
 
     Parameters
@@ -18,9 +26,18 @@ def generate_plan(track: str, completed_courses: List[str], max_credits: int = 1
     """
     df = pd.read_csv('data/towson_courses.csv')
 
-    completed = set(completed_courses)
-    # remove completed courses
-    df = df[~df['course_id'].isin(completed)].copy()
+    # Filter to only courses relevant to the selected track
+    df = df[(df['track'] == 'All') | (df['track'] == track)].copy()
+
+    done_set: Set[str] = set(completed_courses)
+
+    # Mark all courses within an interchangeable set as done if any are completed
+    for course_set in INTERCHANGEABLE_SETS:
+        if done_set.intersection(course_set):
+            done_set.update(course_set)
+
+    # Remove completed courses from the dataframe
+    df = df[~df['course_id'].isin(done_set)].copy()
 
     # helper to check prerequisites
     def met_prereqs(prereq_str: str, done: set) -> bool:
@@ -51,17 +68,16 @@ def generate_plan(track: str, completed_courses: List[str], max_credits: int = 1
 
     plan = []
     remaining = df.copy()
-    scheduled = []
-    done_set = set(completed_courses)
 
     for sem in range(1, 9):
         sem_courses = []
         credits = 0
-        while True:
-            # courses whose prereqs are met
+        while credits < max_credits:
+            # courses whose prerequisites are met
             available = remaining[remaining['prerequisites'].apply(lambda x: met_prereqs(x, done_set))]
             if available.empty:
                 break
+
             # sort by priority then course id for stability
             available = available.sort_values(by=['priority', 'course_id'])
             placed = False
@@ -69,6 +85,7 @@ def generate_plan(track: str, completed_courses: List[str], max_credits: int = 1
                 units = int(row['units'])
                 if credits + units > max_credits:
                     continue
+
                 sem_courses.append({
                     'course_id': row['course_id'],
                     'course_name': row['course_name'],
@@ -76,17 +93,52 @@ def generate_plan(track: str, completed_courses: List[str], max_credits: int = 1
                     'category': row['category']
                 })
                 credits += units
-                done_set.add(row['course_id'])
-                remaining = remaining.drop(idx)
+                course_id = row['course_id']
+                done_set.add(course_id)
+
+                # If this course belongs to an interchangeable set, mark others as done
+                for cset in INTERCHANGEABLE_SETS:
+                    if course_id in cset:
+                        done_set.update(cset)
+                        remaining = remaining[~remaining['course_id'].isin(cset)]
+                        break
+                else:
+                    remaining = remaining.drop(idx)
+
                 placed = True
                 break
+
             if not placed:
                 break
-            if credits >= max_credits:
-                break
+
+            # stop if we've hit minimum target credits and nothing else fits
+            if credits >= 15:
+                # check if any course can still fit without exceeding max
+                more = remaining[remaining['prerequisites'].apply(lambda x: met_prereqs(x, done_set))]
+                fits = False
+                for u in more['units'].astype(int).tolist():
+                    if credits + u <= max_credits:
+                        fits = True
+                        break
+                if not fits:
+                    break
+
         if sem_courses:
             plan.append({'semester': f'Semester {sem}', 'courses': sem_courses, 'credits': credits})
         if remaining.empty:
             break
     unscheduled = remaining[['course_id', 'course_name', 'category']].to_dict('records')
     return plan, unscheduled
+
+
+if __name__ == "__main__":
+    import argparse, json
+
+    parser = argparse.ArgumentParser(description="Generate 4-year plan")
+    parser.add_argument("--track", required=True, help="Selected track")
+    parser.add_argument("--completed", nargs="*", default=[], help="Completed course IDs")
+    parser.add_argument("--max-credits", type=int, default=18, dest="max_credits", help="Maximum credits per semester")
+    args = parser.parse_args()
+
+    plan, unscheduled = generate_plan(args.track, args.completed, args.max_credits)
+    print(json.dumps({"plan": plan, "unscheduled": unscheduled}, indent=2))
