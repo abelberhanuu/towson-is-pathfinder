@@ -1,49 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Towson IS PathFinder</title>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 2rem; background: #f4f4f4; }
-        h1 { color: #333; }
-        label { font-weight: bold; }
-        .course-group { margin-bottom: 1rem; }
-        .checkbox-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 5px;
-        }
-        .submit-button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 1rem;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 </head>
-<body>
-    <h1>Towson IS PathFinder</h1>
-
-    <form method="POST" action="/recommend">
-        <label for="track">Select your track:</label>
-        <select name="track" required>
-            <option value="Business">Business</option>
-            <option value="Data Analytics">Data Analytics</option>
-            <option value="Interface Design">Interface Design</option>
-            <option value="Systems">Systems</option>
-        </select>
-
-        <div class="course-group">
-            <p><strong>Select all courses you've completed:</strong></p>
-            <div class="checkbox-grid">
+<body class="bg-light">
+<div class="container py-4">
+    <h1 class="mb-4">Towson IS PathFinder</h1>
+    <form method="POST" action="/plan">
+        <div class="mb-3">
+            <label for="track" class="form-label">Select your track</label>
+            <select id="track" name="track" class="form-select" required>
+                <option value="Business">Business</option>
+                <option value="Data Analytics">Data Analytics</option>
+                <option value="Interface Design">Interface Design</option>
+                <option value="Systems">Systems</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="max_credits" class="form-label">Maximum credits per semester</label>
+            <input type="number" class="form-control" id="max_credits" name="max_credits" min="12" max="18" value="18">
+        </div>
+        <div class="mb-3">
+            <p class="fw-bold">Select all courses you've completed:</p>
+            <div class="row row-cols-1 row-cols-md-2 g-2">
                 {% for course in courses %}
-                <label>
-                    <input type="checkbox" name="completed_courses" value="{{ course.course_id }}">
-                    {{ course.course_id }} - {{ course.course_name }}
-                </label>
+                <div class="col">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="completed_courses" value="{{ course.course_id }}" id="{{ course.course_id }}">
+                        <label class="form-check-label" for="{{ course.course_id }}">
+                            {{ course.course_id }} - {{ course.course_name }}
+                        </label>
+                    </div>
+                </div>
                 {% endfor %}
             </div>
         </div>
-
-        <button class="submit-button" type="submit">Get Recommendations</button>
+        <button type="submit" class="btn btn-primary">Generate Plan</button>
     </form>
+</div>
 </body>
 </html>
