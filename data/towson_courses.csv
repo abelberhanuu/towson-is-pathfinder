@@ -1,0 +1,61 @@
+course_id,course_name,track,core_required,elective,prerequisites,units
+CIS211,Fundamentals of IS & Technology,All,yes,no,,3
+CIS239,Enterprise Systems and Architecture,All,yes,no,CIS211,3
+CIS350,Telecommunications,All,yes,no,,3
+CIS377,Introduction to Cybersecurity,All,yes,no,,3
+CIS379,Systems Analysis and Design,All,yes,no,CIS211,3
+CIS435,Human-Computer Interaction,All,yes,no,CIS239,3
+CIS458,Organizational Database Management,All,yes,no,CIS379,3
+CIS479,Software Project Management,All,yes,no,CIS379,3
+COSC236,Intro to Computer Science I,All,yes,no,COSC175,4
+COSC237,Intro to Computer Science II,All,yes,no,COSC236,4
+COSC418,Ethical/Societal Concerns of CS,All,yes,no,,3
+ITEC231,Fundamentals of Web Technologies,All,yes,no,,3
+CIS475,IS Capstone,All,yes,no,CIS350;CIS458,3
+MATH211,Calculus for Applications,All,yes,no,,3
+MATH273,Calculus I,Systems,yes,no,,4
+MATH231,Basic Statistics,All,yes,no,,3
+MATH330,Intro to Statistical Methods,All,yes,no,,4
+MATH263,Discrete Mathematics,All,yes,no,,3
+ENGL317,Writing for Business and Industry,All,yes,no,,3
+ACCT201,Financial Accounting,Business,yes,no,,3
+CIS334,Data Organization,Business,yes,no,CIS328,3
+ECON201,Microeconomic Principles,Business,yes,no,,3
+CIS328,Intro to Data Analytics,Data Analytics,yes,no,CIS211,3
+CIS397,Internship in CIS,All,no,yes,,3
+CIS426,Gaming Interface Design,All,no,yes,,3
+CIS428,Text Analytics,Data Analytics,yes,no,CIS334,3
+CIS433,Select Topics in IS,All,no,yes,,3
+CIS440,System Dev / E-Commerce,Business,no,yes,,3
+CIS468,Applied Data Mining,Data Analytics,yes,no,CIS334,3
+CIS495,Independent Study CIS,All,no,yes,,3
+ITEC427,Cloud Computing for Enterprises,All,no,yes,,3
+ITEC433,Cybersecurity Risk Management,All,no,yes,,3
+ACCT202,Managerial Accounting,Business,no,yes,ACCT201,3
+ACCT301,Intermediate Accounting I,Business,no,yes,ACCT202,3
+ACCT341,Management Accounting I,Business,no,yes,ACCT202,3
+EBTM365,Operations Management,Business,no,yes,,3
+EBTM419,Supply Chain Management,Business,no,yes,EBTM365,3
+EBTM454,Business Process Management,Business,no,yes,EBTM365,3
+HLTH207,Healthcare in the U.S.,Business,no,yes,,3
+HCMN305,Health Administration,Business,no,yes,HLTH207,3
+MKTG341,Marketing and Creativity,Business,no,yes,,3
+MNGT361,Leadership and Management,Business,no,yes,,3
+MNGT395,Management of Org Behavior,Business,no,yes,MNGT361,3
+ITEC336,Legal/Policy in IT,Data Analytics,yes,no,,3
+CIS265,Visual Basic Programming,Data Analytics,no,yes,,3
+CIS436,E-Government,Data Analytics,no,yes,,3
+ART102,2D Process Non-Art Majors,Interface Design,yes,no,,3
+ART103,2D Process,Interface Design,yes,no,,3
+ART217,Imagemaking: Digital Process,Interface Design,yes,no,,3
+CIS445,Universal Usability (Blind Users),Interface Design,yes,no,,3
+ART365,Design for the WWW,Interface Design,no,yes,,3
+CIS425,Decision Support Systems,Interface Design,no,yes,,3
+DFST101,Intro to Deaf Studies,Interface Design,no,yes,,3
+COSC336,Data Structures & Algorithms,Systems,yes,no,COSC237,4
+COSC412,Software Engineering,Systems,yes,no,,3
+COSC436,Object-Oriented Design,Systems,yes,no,COSC336,3
+COSC484,Web-Based Programming,Systems,yes,no,,3
+CIS212,Intro to Business Programming,Systems,no,yes,,3
+ITEC345,Scripting Languages,Systems,no,yes,,3
+ITEC423,Emerging Internet Tech,Systems,no,yes,,3

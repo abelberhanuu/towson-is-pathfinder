@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Recommended Courses</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 2rem; background: #f9f9f9; }
+        h1 { color: #333; }
+        .course-box {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: white;
+            border-left: 4px solid #4caf50;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .back-btn {
+            margin-top: 20px;
+            display: inline-block;
+            padding: 10px 20px;
+            background: #4caf50;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Recommended Courses</h1>
+
+    {% if recommendations %}
+        {% for course in recommendations %}
+            <div class="course-box">
+                <strong>{{ course.course_id }}</strong> - {{ course.course_name }}<br>
+                <small>Relevance Score: {{ course.score }}</small>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No recommendations available based on your completed courses.</p>
+    {% endif %}
+
+    <a class="back-btn" href="/">Back to Form</a>
+</body>
+</html>

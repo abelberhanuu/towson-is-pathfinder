@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Towson IS PathFinder</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 2rem; background: #f4f4f4; }
+        h1 { color: #333; }
+        label { font-weight: bold; }
+        .course-group { margin-bottom: 1rem; }
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 5px;
+        }
+        .submit-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>Towson IS PathFinder</h1>
+
+    <form method="POST" action="/recommend">
+        <label for="track">Select your track:</label>
+        <select name="track" required>
+            <option value="Business">Business</option>
+            <option value="Data Analytics">Data Analytics</option>
+            <option value="Interface Design">Interface Design</option>
+            <option value="Systems">Systems</option>
+        </select>
+
+        <div class="course-group">
+            <p><strong>Select all courses you've completed:</strong></p>
+            <div class="checkbox-grid">
+                {% for course in courses %}
+                <label>
+                    <input type="checkbox" name="completed_courses" value="{{ course.course_id }}">
+                    {{ course.course_id }} - {{ course.course_name }}
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <button class="submit-button" type="submit">Get Recommendations</button>
+    </form>
+</body>
+</html>
