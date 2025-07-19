@@ -8,7 +8,7 @@
 </head>
 <body class="bg-light">
 <main class="container py-4">
-    <h1 class="mb-4">Towson IS PathFinder</h1>
+    <h1 id="pageTitle" class="mb-4">Towson IS PathFinder</h1>
     <form method="POST" action="/plan" aria-labelledby="pageTitle">
         <div class="mb-3">
             <label for="track" class="form-label">Select your track</label>
@@ -19,10 +19,12 @@
                 <option value="Systems">Systems</option>
             </select>
         </div>
+
         <div class="mb-3">
             <label for="max_credits" class="form-label">Maximum credits per semester</label>
             <input type="number" class="form-control" id="max_credits" name="max_credits" min="12" max="18" value="18">
         </div>
+
         <fieldset class="mb-3">
             <legend class="fw-bold fs-6">Select all courses you've completed:</legend>
             <div class="row row-cols-1 row-cols-md-2 g-2">
@@ -38,6 +40,7 @@
                 {% endfor %}
             </div>
         </fieldset>
+
         <button type="submit" class="btn btn-primary">Generate Plan</button>
     </form>
 </main>

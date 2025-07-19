@@ -9,6 +9,7 @@
 <body class="bg-light">
 <main class="container py-4">
     <h1 class="mb-4">Generated 4-Year Plan</h1>
+
     <div class="accordion mb-4" id="planAccordion">
         {% for sem in plan %}
         <div class="accordion-item">
@@ -24,7 +25,7 @@
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <span>
                                 <strong>{{ c.course_id }}</strong> - {{ c.course_name }}
-                                <span class="badge bg-info text-dark ms-1">{{ c.category }}</span>
+                                <span class="badge bg-info text-dark ms-2">{{ c.category }}</span>
                             </span>
                             <span class="badge bg-secondary">{{ c.units }} cr</span>
                         </li>
@@ -37,15 +38,19 @@
     </div>
 
     {% if unscheduled %}
-    <h2 class="h5">Unscheduled Courses</h2>
-    <ul>
+    <h2 class="h5 mt-5">Unscheduled Courses</h2>
+    <ul class="list-group">
         {% for c in unscheduled %}
-        <li>{{ c.course_id }} - {{ c.course_name }} ({{ c.category }})</li>
+        <li class="list-group-item">
+            <strong>{{ c.course_id }}</strong> - {{ c.course_name }} ({{ c.category }})
+        </li>
         {% endfor %}
     </ul>
     {% endif %}
 
-    <a href="/" class="btn btn-secondary">Back</a>
+    <a href="/" class="btn btn-secondary mt-4">Back</a>
 </main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
