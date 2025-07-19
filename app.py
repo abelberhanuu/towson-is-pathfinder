@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 import pandas as pd
 from recommender import recommend_courses
+from generate_plan import generate_plan
 
 app = Flask(__name__)
 
@@ -16,6 +17,14 @@ def recommend():
     completed_courses = request.form.getlist('completed_courses')
     recommendations = recommend_courses(track, completed_courses)
     return render_template('results.html', recommendations=recommendations)
+
+@app.route('/plan', methods=['POST'])
+def plan():
+    track = request.form.get('track')
+    completed_courses = request.form.getlist('completed_courses')
+    max_credits = request.form.get('max_credits', type=int, default=18)
+    plan, unscheduled = generate_plan(track, completed_courses, max_credits)
+    return render_template('plan.html', plan=plan, unscheduled=unscheduled)
 
 if __name__ == '__main__':
     app.run(debug=True)
