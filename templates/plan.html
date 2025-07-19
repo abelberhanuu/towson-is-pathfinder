@@ -8,6 +8,7 @@
 <body class="bg-light">
 <div class="container py-4">
     <h1 class="mb-4">Generated 4-Year Plan</h1>
+
     {% for sem in plan %}
     <div class="card mb-4">
         <div class="card-header fw-semibold">
@@ -28,15 +29,17 @@
     {% endfor %}
 
     {% if unscheduled %}
-    <h2 class="h5">Unscheduled Courses</h2>
-    <ul>
+    <h2 class="h5 mt-5">Unscheduled Courses</h2>
+    <ul class="list-group">
         {% for c in unscheduled %}
-        <li>{{ c.course_id }} - {{ c.course_name }} ({{ c.category }})</li>
+        <li class="list-group-item">
+            <strong>{{ c.course_id }}</strong> - {{ c.course_name }} ({{ c.category }})
+        </li>
         {% endfor %}
     </ul>
     {% endif %}
 
-    <a href="/" class="btn btn-secondary">Back</a>
+    <a href="/" class="btn btn-secondary mt-4">Back</a>
 </div>
 </body>
 </html>
