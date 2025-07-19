@@ -23,25 +23,62 @@ INTERCHANGEABLE_SETS: List[Set[str]] = [
 
 # Mapping of prerequisites by course ID for consistent lookup
 PREREQ_MAP: Dict[str, List[str]] = {
+    # Global core requirements
     "COSC236": ["COSC175"],
     "COSC237": ["COSC236"],
     "CIS239": ["CIS211"],
-    "CIS379": ["CIS211"],
-    "CIS458": ["CIS379"],
+    "CIS350": [],
+    "CIS377": [],
+    "CIS379": ["COSC237"],
+    "CIS435": [],
+    "CIS458": ["CIS239"],
     "CIS479": ["CIS379"],
     "CIS475": ["CIS479", "CIS458"],
-    "COSC418": ["ENGL102"],
     "ENGL317": ["ENGL102"],
-    "CIS334": ["CIS379"],
+    "COSC418": ["ENGL102"],
+
+    # Data Analytics track
     "CIS328": ["CIS211"],
-    "CIS428": ["CIS328", "CIS334"],
+    "CIS334": ["CIS379"],
+    "CIS428": ["CIS328", "CIS334"],  # simplified AND requirement
     "CIS468": ["MATH231", "CIS334"],
-    "CIS436": ["CIS379"],
-    "ART217": ["ART103"],
+    "ITEC336": [],
     "COSC336": ["COSC237"],
+    # Track electives
+    "CIS265": [],
+    "CIS397": ["CIS334"],
+    "CIS426": ["CIS328"],
+    "CIS436": ["CIS379"],
+    "ITEC427": ["ITEC231"],
+
+    # Systems track
     "COSC412": ["COSC336"],
     "COSC436": ["COSC336"],
     "COSC484": ["COSC336"],
+    "CIS212": [],
+    "CIS425": ["CIS379", "MATH231"],
+    "CIS440": ["CIS379"],
+    "CIS495": [],
+    "ITEC345": ["COSC236", "MATH263"],
+    "ITEC423": ["ITEC231"],
+
+    # Interface design
+    "ART102": [],
+    "ART103": [],
+    "ART217": ["ART103"],
+    "ART322": ["ART217"],
+
+    # Business track
+    "ACCT201": [],
+    "ECON201": [],
+    "ECON203": [],
+    "ECON205": ["ECON201"],
+    "LEGL225": [],
+    "MKTG341": ["ECON201"],
+    "MNGT361": ["ECON201"],
+    "FIN331": ["ACCT201", "ECON205"],
+
+    # Additional business electives
     "ACCT202": ["ACCT201"],
     "ACCT301": ["ACCT202"],
     "ACCT341": ["ACCT202"],
@@ -49,9 +86,7 @@ PREREQ_MAP: Dict[str, List[str]] = {
     "EBTM454": ["EBTM365"],
     "HCMN305": ["HLTH207"],
     "MNGT395": ["MNGT361"],
-    "ITEC427": ["ITEC231"],
-    "ITEC345": ["COSC236", "MATH263"],
-    "ITEC423": ["ITEC231"],
+    "ITEC433": [],
 }
 
 
@@ -85,14 +120,9 @@ def generate_plan(track: str, completed_courses: List[str], max_credits: int = 1
     # Remove completed courses from the dataframe
     df = df[~df['course_id'].isin(done_set)].copy()
 
-    # helper to check prerequisites using the mapping above
-    def met_prereqs(course_id: str, prereq_str: str, done: set) -> bool:
-        prereqs = PREREQ_MAP.get(course_id)
-        if prereqs is None:
-            if pd.isna(prereq_str) or prereq_str.strip() == '':
-                prereqs = []
-            else:
-                prereqs = [p.strip() for p in prereq_str.replace(';', ',').split(',') if p.strip()]
+    # helper to check prerequisites using only the explicit map
+    def met_prereqs(course_id: str, done: Set[str]) -> bool:
+        prereqs = PREREQ_MAP.get(course_id, [])
         return all(pr in done for pr in prereqs)
 
     # label course category
@@ -119,7 +149,7 @@ def generate_plan(track: str, completed_courses: List[str], max_credits: int = 1
         credits = 0
         while credits < max_credits:
             # courses whose prerequisites are met
-            available = remaining[remaining.apply(lambda r: met_prereqs(r['course_id'], r['prerequisites'], done_set), axis=1)]
+            available = remaining[remaining.apply(lambda r: met_prereqs(r['course_id'], done_set), axis=1)]
             if available.empty:
                 break
 
@@ -159,7 +189,7 @@ def generate_plan(track: str, completed_courses: List[str], max_credits: int = 1
             # stop if we've hit minimum target credits and nothing else fits
             if credits >= 15:
                 # check if any course can still fit without exceeding max
-                more = remaining[remaining.apply(lambda r: met_prereqs(r['course_id'], r['prerequisites'], done_set), axis=1)]
+                more = remaining[remaining.apply(lambda r: met_prereqs(r['course_id'], done_set), axis=1)]
                 fits = False
                 for u in more['units'].astype(int).tolist():
                     if credits + u <= max_credits:
