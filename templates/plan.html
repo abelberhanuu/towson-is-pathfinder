@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>4-Year Plan</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+<div class="container py-4">
+    <h1 class="mb-4">Generated 4-Year Plan</h1>
+    {% for sem in plan %}
+    <div class="card mb-4">
+        <div class="card-header fw-semibold">
+            {{ sem.semester }} ({{ sem.credits }} credits)
+        </div>
+        <ul class="list-group list-group-flush">
+            {% for c in sem.courses %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>
+                    <strong>{{ c.course_id }}</strong> - {{ c.course_name }}
+                    <small class="text-muted">({{ c.category }})</small>
+                </span>
+                <span class="badge bg-secondary">{{ c.units }} cr</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endfor %}
+
+    {% if unscheduled %}
+    <h2 class="h5">Unscheduled Courses</h2>
+    <ul>
+        {% for c in unscheduled %}
+        <li>{{ c.course_id }} - {{ c.course_name }} ({{ c.category }})</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <a href="/" class="btn btn-secondary">Back</a>
+</div>
+</body>
+</html>
