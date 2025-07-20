@@ -1,8 +1,7 @@
 from __future__ import annotations
-
 from typing import Dict, List, Set, Tuple
-
 from datetime import datetime
+
 import pandas as pd
 from utils import load_courses, parse_prereqs
 
@@ -35,17 +34,16 @@ INTERCHANGEABLE_SETS: List[Set[str]] = [
 
 def generate_4_year_plan(
     student_track: str, completed_courses: List[str], max_units: int
-) -> List[Dict]:
-    """Return an eight-semester plan for the given track."""
-
-    plan, _ = generate_plan(student_track, completed_courses, max_units)
+) -> Tuple[List[Dict], List[Dict]]:
+    """Wrapper to ensure full 8-semester plan is returned along with unscheduled courses."""
+    plan, unscheduled = generate_plan(student_track, completed_courses, max_units)
 
     while len(plan) < 8:
         plan.append(
             {"semester": SEMESTER_LABELS[len(plan)], "courses": [], "credits": 0}
         )
 
-    return plan
+    return plan, unscheduled
 
 
 def generate_plan(
@@ -166,5 +164,5 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    plan = generate_4_year_plan(args.track, args.completed, args.max_credits)
-    print(json.dumps({"plan": plan}, indent=2))
+    plan, unscheduled = generate_4_year_plan(args.track, args.completed, args.max_credits)
+    print(json.dumps({"plan": plan, "unscheduled": unscheduled}, indent=2))
