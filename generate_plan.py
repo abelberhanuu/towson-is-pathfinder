@@ -143,4 +143,37 @@ def generate_plan(
 
         if sem_courses:
             label = SEMESTER_LABELS[sem]
-            plan.append({"s
+            plan.append(
+                {
+                    "semester": label,
+                    "courses": sem_courses,
+                    "credits": credits,
+                }
+            )
+        if remaining.empty:
+            break
+
+    remaining = remaining.copy()
+    remaining["prerequisites"] = remaining["prerequisites"].apply(parse_prereqs)
+    unscheduled = remaining[
+        ["course_id", "course_name", "category", "prerequisites"]
+    ].to_dict("records")
+    return plan, unscheduled
+
+
+if __name__ == "__main__":
+    import argparse
+    import json
+
+    parser = argparse.ArgumentParser(description="Generate 4-year plan")
+    parser.add_argument("--track", required=True, help="Selected track")
+    parser.add_argument(
+        "--completed", nargs="*", default=[], help="Completed course IDs"
+    )
+    parser.add_argument(
+        "--max-credits", type=int, default=18, help="Maximum credits per semester"
+    )
+    args = parser.parse_args()
+
+    plan, unscheduled = generate_4_year_plan(args.track, args.completed, args.max_credits)
+    print(json.dumps({"plan": plan, "unscheduled": unscheduled}, indent=2))
