@@ -3,7 +3,7 @@ from __future__ import annotations
 from flask import Flask, render_template, request
 
 from recommender import recommend_courses
-from generate_plan import generate_plan
+from generate_plan import generate_4_year_plan
 from utils import load_courses
 
 app = Flask(__name__)
@@ -35,7 +35,8 @@ def plan():
     track = request.form.get("track")
     completed_courses = request.form.getlist("completed_courses")
     max_credits = request.form.get("max_credits", type=int, default=18)
-    plan, unscheduled = generate_plan(track, completed_courses, max_credits)
+
+    plan, unscheduled = generate_4_year_plan(track, completed_courses, max_credits)
 
     df = load_courses()
     total = df["units"].astype(int).sum()

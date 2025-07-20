@@ -1,42 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Recommended Courses</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Recommended Courses</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <main class="container py-4">
-    <h1 class="mb-4">Recommended Courses</h1>
+<main class="container py-4">
+  <h1 class="mb-4">Recommended Courses</h1>
 
-    {% if recommendations %}
-        <div class="list-group mb-4">
-        {% for course in recommendations %}
-            <div class="list-group-item d-flex justify-content-between align-items-start">
-                <div class="ms-2 me-auto">
-                    <div class="fw-bold">{{ course.course_id }} - {{ course.course_name }}</div>
-                    <small class="text-muted">Score: {{ course.score }}</small>
-                </div>
-            </div>
-        {% endfor %}
+  {% if recommendations %}
+    <div class="list-group mb-4">
+      {% for course in recommendations %}
+        <div class="list-group-item d-flex justify-content-between align-items-start">
+          <div class="ms-2 me-auto">
+            <div class="fw-bold">{{ course.course_id }} - {{ course.course_name }}</div>
+            <small class="text-muted">Score: {{ course.score }}</small>
+          </div>
         </div>
-    {% else %}
-        <p>No recommendations available based on your completed courses.</p>
-    {% endif %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No recommendations available based on your completed courses.</p>
+  {% endif %}
 
-    {% if locked %}
+  {% if locked %}
     <h2 class="h5 mt-4">Locked Courses</h2>
     <ul class="list-group">
-        {% for l in locked %}
-        <li class="list-group-item">
-            {{ l.course_id }} - requires {{ l.missing | join(', ') }}
-        </li>
-        {% endfor %}
+      {% for l in locked %}
+      <li class="list-group-item">
+        {{ l.course_id }} – requires {{ l.missing | join(', ') }}
+      </li>
+      {% endfor %}
     </ul>
-    {% endif %}
-    <a class="btn btn-secondary mt-4" href="/">Back</a>
-    </main>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  {% endif %}
+
+  <a class="btn btn-secondary mt-4" href="/">Back</a>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

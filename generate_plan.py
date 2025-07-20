@@ -1,18 +1,17 @@
 from __future__ import annotations
-
-from datetime import datetime
 from typing import Dict, List, Set, Tuple
+from datetime import datetime
 
 import pandas as pd
 from utils import load_courses, parse_prereqs
 
 
 def generate_semester_labels() -> List[str]:
-    current_year = datetime.now().year
-    start_season = "Spring" if datetime.now().month <= 6 else "Fall"
-    season = start_season
-    year = current_year
-    labels = []
+    """Create semester labels starting with the upcoming fall term."""
+    now = datetime.now()
+    year = now.year if now.month < 6 else now.year + 1
+    season = "Fall"
+    labels: List[str] = []
     for _ in range(8):
         labels.append(f"{season} {year}")
         if season == "Fall":
@@ -31,6 +30,20 @@ INTERCHANGEABLE_SETS: List[Set[str]] = [
     {"ART102", "ART103"},
     {"CIS212", "COSC236"},
 ]
+
+
+def generate_4_year_plan(
+    student_track: str, completed_courses: List[str], max_units: int
+) -> Tuple[List[Dict], List[Dict]]:
+    """Wrapper to ensure full 8-semester plan is returned along with unscheduled courses."""
+    plan, unscheduled = generate_plan(student_track, completed_courses, max_units)
+
+    while len(plan) < 8:
+        plan.append(
+            {"semester": SEMESTER_LABELS[len(plan)], "courses": [], "credits": 0}
+        )
+
+    return plan, unscheduled
 
 
 def generate_plan(
@@ -151,5 +164,5 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    plan, unscheduled = generate_plan(args.track, args.completed, args.max_credits)
+    plan, unscheduled = generate_4_year_plan(args.track, args.completed, args.max_credits)
     print(json.dumps({"plan": plan, "unscheduled": unscheduled}, indent=2))
