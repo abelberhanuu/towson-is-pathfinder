@@ -9,6 +9,7 @@
 <body class="bg-light">
 <main class="container py-4">
     <h1 class="mb-4">Generated 4-Year Plan</h1>
+    <p class="mb-3">Credits Completed: {{ stats.completed }} / {{ stats.total }}</p>
 
     <div class="accordion mb-4" id="planAccordion">
         {% for sem in plan %}
@@ -22,12 +23,17 @@
                 <div class="accordion-body p-0">
                     <ul class="list-group list-group-flush">
                         {% for c in sem.courses %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>
-                                <strong>{{ c.course_id }}</strong> - {{ c.course_name }}
-                                <span class="badge bg-info text-dark ms-2">{{ c.category }}</span>
-                            </span>
-                            <span class="badge bg-secondary">{{ c.units }} cr</span>
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <span>
+                                    <strong>{{ c.course_id }}</strong> - {{ c.course_name }}
+                                    <span class="badge bg-info text-dark ms-2">{{ c.category }}</span>
+                                </span>
+                                <span class="badge bg-secondary">{{ c.units }} cr</span>
+                            </div>
+                            {% if c.prerequisites %}
+                            <small class="text-muted">Prereqs: {{ c.prerequisites | join(', ') }}</small>
+                            {% endif %}
                         </li>
                         {% endfor %}
                     </ul>
@@ -42,7 +48,12 @@
     <ul class="list-group">
         {% for c in unscheduled %}
         <li class="list-group-item">
-            <strong>{{ c.course_id }}</strong> - {{ c.course_name }} ({{ c.category }})
+            <div class="d-flex justify-content-between">
+                <span><strong>{{ c.course_id }}</strong> - {{ c.course_name }} ({{ c.category }})</span>
+            </div>
+            {% if c.prerequisites %}
+            <small class="text-muted">Prereqs: {{ c.prerequisites | join(', ') }}</small>
+            {% endif %}
         </li>
         {% endfor %}
     </ul>
