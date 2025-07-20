@@ -5,52 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>4-Year Plan</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="bg-light">
 <main class="container py-4">
     <h1 class="mb-4">Generated 4-Year Plan</h1>
-
-    <div class="accordion mb-4" id="planAccordion">
-        {% for sem in plan %}
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="heading{{ loop.index }}">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="false" aria-controls="collapse{{ loop.index }}">
-                    {{ sem.semester }} ({{ sem.credits }} credits)
-                </button>
-            </h2>
-            <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#planAccordion">
-                <div class="accordion-body p-0">
-                    <ul class="list-group list-group-flush">
-                        {% for c in sem.courses %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>
-                                <strong>{{ c.course_id }}</strong> - {{ c.course_name }}
-                                <span class="badge bg-info text-dark ms-2">{{ c.category }}</span>
-                            </span>
-                            <span class="badge bg-secondary">{{ c.units }} cr</span>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-
-    {% if unscheduled %}
-    <h2 class="h5 mt-5">Unscheduled Courses</h2>
-    <ul class="list-group">
-        {% for c in unscheduled %}
-        <li class="list-group-item">
-            <strong>{{ c.course_id }}</strong> - {{ c.course_name }} ({{ c.category }})
-        </li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-
+    <p class="mb-3">Credits Completed: {{ stats.completed }} / {{ stats.total }}</p>
+    {% set year_names = ['Freshman', 'Sophomore', 'Junior', 'Senior'] %}
+    {% for sem in plan %}
+        {% if loop.index0 % 2 == 0 %}
+            <h2 class="mt-4">{{ year_names[loop.index0 // 2] }} Year</h2>
+        {% endif %}
+        <h4>{{ sem.semester }}</h4>
+        <table class="table table-striped table-sm mb-3">
+            <thead>
+                <tr><th>Course</th><th>Units</th></tr>
+            </thead>
+            <tbody>
+            {% for c in sem.courses %}
+                <tr>
+                    <td>{{ c.course_id }} - {{ c.course_name }}</td>
+                    <td>{{ c.units }}</td>
+                </tr>
+            {% endfor %}
+            <tr class="table-secondary">
+                <th>Total Units</th>
+                <th>{{ sem.credits }}</th>
+            </tr>
+            </tbody>
+        </table>
+    {% endfor %}
     <a href="/" class="btn btn-secondary mt-4">Back</a>
 </main>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
