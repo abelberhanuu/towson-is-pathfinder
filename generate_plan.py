@@ -1,7 +1,6 @@
 from __future__ import annotations
 from typing import Dict, List, Set, Tuple
 from datetime import datetime
-
 import pandas as pd
 from utils import load_courses, parse_prereqs
 
@@ -35,7 +34,7 @@ INTERCHANGEABLE_SETS: List[Set[str]] = [
 def generate_4_year_plan(
     student_track: str, completed_courses: List[str], max_units: int
 ) -> Tuple[List[Dict], List[Dict]]:
-    """Wrapper to ensure full 8-semester plan is returned along with unscheduled courses."""
+    """Return an eight-semester plan for the given track and any unscheduled courses."""
     plan, unscheduled = generate_plan(student_track, completed_courses, max_units)
 
     while len(plan) < 8:
@@ -58,11 +57,12 @@ def generate_plan(
             done_set.update(course_set)
 
     df = df[~df["course_id"].isin(done_set)].copy()
+    catalog_ids: Set[str] = set(df["course_id"].tolist())
 
     def met_prereqs(course_id: str) -> bool:
         row = df[df["course_id"] == course_id].iloc[0]
         prereqs = parse_prereqs(row.get("prerequisites", ""))
-        return all(pr in done_set for pr in prereqs)
+        return all(pr in done_set or pr not in catalog_ids for pr in prereqs)
 
     def label(row: pd.Series) -> str:
         if row["core_required"] == "yes" and row["track"] == "All":
@@ -88,6 +88,9 @@ def generate_plan(
         credits = 0
 
         while credits < max_credits:
+            if remaining.empty:
+                break
+
             available = remaining[remaining["course_id"].apply(met_prereqs)]
             if available.empty:
                 break
@@ -128,6 +131,8 @@ def generate_plan(
                 break
 
             if credits >= 15:
+                if remaining.empty:
+                    break
                 more = remaining[remaining["course_id"].apply(met_prereqs)]
                 fits = any(
                     credits + int(u) <= max_credits
@@ -138,31 +143,4 @@ def generate_plan(
 
         if sem_courses:
             label = SEMESTER_LABELS[sem]
-            plan.append({"semester": label, "courses": sem_courses, "credits": credits})
-        if remaining.empty:
-            break
-
-    remaining = remaining.copy()
-    remaining["prerequisites"] = remaining["prerequisites"].apply(parse_prereqs)
-    unscheduled = remaining[
-        ["course_id", "course_name", "category", "prerequisites"]
-    ].to_dict("records")
-    return plan, unscheduled
-
-
-if __name__ == "__main__":
-    import argparse
-    import json
-
-    parser = argparse.ArgumentParser(description="Generate 4-year plan")
-    parser.add_argument("--track", required=True, help="Selected track")
-    parser.add_argument(
-        "--completed", nargs="*", default=[], help="Completed course IDs"
-    )
-    parser.add_argument(
-        "--max-credits", type=int, default=18, help="Maximum credits per semester"
-    )
-    args = parser.parse_args()
-
-    plan, unscheduled = generate_4_year_plan(args.track, args.completed, args.max_credits)
-    print(json.dumps({"plan": plan, "unscheduled": unscheduled}, indent=2))
+            plan.append({"s
