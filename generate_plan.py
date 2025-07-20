@@ -1,29 +1,21 @@
 from __future__ import annotations
 
-from datetime import datetime
 from typing import Dict, List, Set, Tuple
 
 import pandas as pd
 from utils import load_courses, parse_prereqs
 
 
-def generate_semester_labels() -> List[str]:
-    current_year = datetime.now().year
-    start_season = "Spring" if datetime.now().month <= 6 else "Fall"
-    season = start_season
-    year = current_year
-    labels = []
-    for _ in range(8):
-        labels.append(f"{season} {year}")
-        if season == "Fall":
-            season = "Spring"
-            year += 1
-        else:
-            season = "Fall"
-    return labels
-
-
-SEMESTER_LABELS = generate_semester_labels()
+SEMESTER_LABELS = [
+    "Fall 2023",
+    "Spring 2024",
+    "Fall 2024",
+    "Spring 2025",
+    "Fall 2025",
+    "Spring 2026",
+    "Fall 2026",
+    "Spring 2027",
+]
 
 INTERCHANGEABLE_SETS: List[Set[str]] = [
     {"MATH211", "MATH273"},
@@ -31,6 +23,21 @@ INTERCHANGEABLE_SETS: List[Set[str]] = [
     {"ART102", "ART103"},
     {"CIS212", "COSC236"},
 ]
+
+
+def generate_4_year_plan(
+    student_track: str, completed_courses: List[str], max_units: int
+) -> List[Dict]:
+    """Return a fixed 8-semester plan based on the student's track."""
+
+    plan, _ = generate_plan(student_track, completed_courses, max_units)
+
+    while len(plan) < 8:
+        plan.append(
+            {"semester": SEMESTER_LABELS[len(plan)], "courses": [], "credits": 0}
+        )
+
+    return plan
 
 
 def generate_plan(
@@ -151,5 +158,5 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    plan, unscheduled = generate_plan(args.track, args.completed, args.max_credits)
-    print(json.dumps({"plan": plan, "unscheduled": unscheduled}, indent=2))
+    plan = generate_4_year_plan(args.track, args.completed, args.max_credits)
+    print(json.dumps({"plan": plan}, indent=2))
