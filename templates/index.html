@@ -9,7 +9,7 @@
 <body class="bg-light">
 <main class="container py-4">
     <h1 id="pageTitle" class="mb-4">Towson IS PathFinder</h1>
-    <form method="POST" action="/plan" aria-labelledby="pageTitle">
+    <form method="POST" action="/plan" aria-labelledby="pageTitle" class="vstack gap-4">
         <div class="mb-3">
             <label for="track" class="form-label">Select your track</label>
             <select id="track" name="track" class="form-select" required>
@@ -41,7 +41,10 @@
             </div>
         </fieldset>
 
-        <button type="submit" class="btn btn-primary">Generate Plan</button>
+        <div class="d-flex gap-2">
+            <button type="submit" formaction="/recommend" class="btn btn-secondary">Get Recommendations</button>
+            <button type="submit" class="btn btn-primary">Generate Plan</button>
+        </div>
     </form>
 </main>
 </body>
