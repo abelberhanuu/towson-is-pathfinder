@@ -1,7 +1,5 @@
 from __future__ import annotations
-
 from typing import Dict, List, Set, Tuple
-
 from datetime import datetime
 import pandas as pd
 from utils import load_courses, parse_prereqs
@@ -35,17 +33,16 @@ INTERCHANGEABLE_SETS: List[Set[str]] = [
 
 def generate_4_year_plan(
     student_track: str, completed_courses: List[str], max_units: int
-) -> List[Dict]:
-    """Return an eight-semester plan for the given track."""
-
-    plan, _ = generate_plan(student_track, completed_courses, max_units)
+) -> Tuple[List[Dict], List[Dict]]:
+    """Return an eight-semester plan for the given track and any unscheduled courses."""
+    plan, unscheduled = generate_plan(student_track, completed_courses, max_units)
 
     while len(plan) < 8:
         plan.append(
             {"semester": SEMESTER_LABELS[len(plan)], "courses": [], "credits": 0}
         )
 
-    return plan
+    return plan, unscheduled
 
 
 def generate_plan(
@@ -60,7 +57,6 @@ def generate_plan(
             done_set.update(course_set)
 
     df = df[~df["course_id"].isin(done_set)].copy()
-
     catalog_ids: Set[str] = set(df["course_id"].tolist())
 
     def met_prereqs(course_id: str) -> bool:
@@ -94,6 +90,7 @@ def generate_plan(
         while credits < max_credits:
             if remaining.empty:
                 break
+
             available = remaining[remaining["course_id"].apply(met_prereqs)]
             if available.empty:
                 break
@@ -146,31 +143,4 @@ def generate_plan(
 
         if sem_courses:
             label = SEMESTER_LABELS[sem]
-            plan.append({"semester": label, "courses": sem_courses, "credits": credits})
-        if remaining.empty:
-            break
-
-    remaining = remaining.copy()
-    remaining["prerequisites"] = remaining["prerequisites"].apply(parse_prereqs)
-    unscheduled = remaining[
-        ["course_id", "course_name", "category", "prerequisites"]
-    ].to_dict("records")
-    return plan, unscheduled
-
-
-if __name__ == "__main__":
-    import argparse
-    import json
-
-    parser = argparse.ArgumentParser(description="Generate 4-year plan")
-    parser.add_argument("--track", required=True, help="Selected track")
-    parser.add_argument(
-        "--completed", nargs="*", default=[], help="Completed course IDs"
-    )
-    parser.add_argument(
-        "--max-credits", type=int, default=18, help="Maximum credits per semester"
-    )
-    args = parser.parse_args()
-
-    plan = generate_4_year_plan(args.track, args.completed, args.max_credits)
-    print(json.dumps({"plan": plan}, indent=2))
+            plan.append({"s

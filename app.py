@@ -35,7 +35,8 @@ def plan():
     track = request.form.get("track")
     completed_courses = request.form.getlist("completed_courses")
     max_credits = request.form.get("max_credits", type=int, default=18)
-    plan = generate_4_year_plan(track, completed_courses, max_credits)
+
+    plan, unscheduled = generate_4_year_plan(track, completed_courses, max_credits)
 
     df = load_courses()
     total = df["units"].astype(int).sum()
@@ -43,7 +44,7 @@ def plan():
     completed = completed_df["units"].astype(int).sum()
     stats = {"completed": int(completed), "total": int(total)}
 
-    return render_template("plan.html", plan=plan, stats=stats)
+    return render_template("plan.html", plan=plan, unscheduled=unscheduled, stats=stats)
 
 
 if __name__ == "__main__":
